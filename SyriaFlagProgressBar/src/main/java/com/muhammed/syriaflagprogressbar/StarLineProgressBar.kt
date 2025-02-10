@@ -1,39 +1,38 @@
 package com.muhammed.syriaflagprogressbar
 
+import android.animation.ValueAnimator
 import android.content.Context
-import android.util.AttributeSet
-import android.view.View
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.animation.ValueAnimator
 import android.graphics.Path
+import android.util.AttributeSet
+import android.view.View
 import android.view.animation.LinearInterpolator
 import kotlin.math.cos
-import kotlin.math.min
 import kotlin.math.sin
 
-class CircleFlagProgressBar @JvmOverloads constructor(
+class StarLineProgressBar @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    private val paint1 = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.rgb(0, 100, 0)//color = Color.GREEN
+    private val paintLine1 = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.rgb(0, 100, 0)
         style = Paint.Style.STROKE
         strokeWidth = 15f
         strokeCap = Paint.Cap.ROUND
     }
 
-    private val paint2 = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    private val paintLine2 = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
         style = Paint.Style.STROKE
-        strokeWidth = 25f
+        strokeWidth = 30f
         strokeCap = Paint.Cap.ROUND
     }
 
-    private val paint3 = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    private val paintLine3 = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.BLACK
         style = Paint.Style.STROKE
         strokeWidth = 15f
@@ -45,18 +44,14 @@ class CircleFlagProgressBar @JvmOverloads constructor(
         style = Paint.Style.FILL
     }
 
-    private var angle1 = 0f
-    private var angle2 = 0f
-    private var angle3 = 0f
-
-    private val animator = ValueAnimator.ofFloat(0f, 360f).apply {
-        duration = 2000
+    private var offset = 0f
+    private val animator = ValueAnimator.ofFloat(0f, 100f).apply {
+        duration = 1000
         repeatCount = ValueAnimator.INFINITE
+        repeatMode = ValueAnimator.REVERSE
         interpolator = LinearInterpolator()
         addUpdateListener {
-            angle1 = it.animatedValue as Float
-            angle2 = -(it.animatedValue as Float) as Float * 1.5f
-            angle3 = it.animatedValue as Float * 2f
+            offset = it.animatedValue as Float
             invalidate()
         }
     }
@@ -65,21 +60,21 @@ class CircleFlagProgressBar @JvmOverloads constructor(
         super.onDraw(canvas)
         val cx = width / 2f
         val cy = height / 2f
-        val radius = min(cx, cy) * 0.8f
+        val lineLength = width * 0.7f
 
-        // Üç halkayı çiz
-        canvas.drawArc(cx - radius, cy - radius, cx + radius, cy + radius, angle1, 300f, false, paint1)
-        canvas.drawArc(cx - radius * 0.75f, cy - radius * 0.75f, cx + radius * 0.75f, cy + radius * 0.75f, angle2, 300f, false, paint2)
-        canvas.drawArc(cx - radius * 0.5f, cy - radius * 0.5f, cx + radius * 0.5f, cy + radius * 0.5f, angle3, 300f, false, paint3)
+        // Üst çizgi
+        canvas.drawLine(cx - lineLength / 2, cy - 60, cx + lineLength / 2, cy - 60, paintLine1)
 
-//        // Ortadaki halkaya üç kırmızı yıldız ekle
-        val middleRadius = radius * 0.745f
-        drawStar(canvas, cx, cy - middleRadius, 10f)
-        drawStar(canvas, cx - middleRadius * cos(Math.PI / 6).toFloat(), cy + middleRadius * sin(Math.PI / 6).toFloat(), 10f)
-        drawStar(canvas, cx + middleRadius * cos(Math.PI / 6).toFloat(), cy + middleRadius * sin(Math.PI / 6).toFloat(), 10f)
+        // Orta çizgi (yıldızlı)
+        canvas.drawLine(cx - lineLength / 2, cy, cx + lineLength / 2, cy, paintLine2)
+        drawStar(canvas, cx - lineLength / 3 + offset, cy, 15f)
+        drawStar(canvas, cx, cy, 15f)
+        drawStar(canvas, cx + lineLength / 3 - offset, cy, 15f)
+
+        // Alt çizgi
+        canvas.drawLine(cx - lineLength / 2, cy + 60, cx + lineLength / 2, cy + 60, paintLine3)
     }
 
-    // Yıldız çizen fonksiyon
     private fun drawStar(canvas: Canvas, cx: Float, cy: Float, size: Float) {
         val path = Path()
         val angle = Math.PI / 5  // 36 derece
@@ -103,4 +98,3 @@ class CircleFlagProgressBar @JvmOverloads constructor(
         animator.cancel()
     }
 }
-
