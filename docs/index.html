@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SyriaFlagProgressBar</title>
+  <meta name="description" content="Animated, flag-themed loading indicators for Android. Three Kotlin views that scale to any size.">
+  <meta property="og:title" content="SyriaFlagProgressBar">
+  <meta property="og:description" content="Animated, flag-themed loading indicators for Android.">
+  <meta property="og:image" content="https://muhammedelsami.github.io/SyriaFlagProgressBar/assets/demo.gif">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23E4002B' d='M12 1.5l3.1 6.9 7.4.8-5.5 5.1 1.5 7.4L12 18l-6.5 3.7 1.5-7.4L1.5 9.2l7.4-.8z'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F2F4F2;
+      --surface: #FFFFFF;
+      --text: #161616;
+      --muted: #5C635E;
+      --line: #D8DDD9;
+      --plate: #019386;
+      --green: #006400;
+      --red: #E4002B;
+      --code-bg: #1B1F1D;
+      --code-text: #E8ECE9;
+      --radius: 14px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #131614;
+        --surface: #1B1F1D;
+        --text: #EEF1EF;
+        --muted: #A2ABA5;
+        --line: #2C3330;
+        --code-bg: #0C0E0D;
+        --code-text: #E8ECE9;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #131614;
+      --surface: #1B1F1D;
+      --text: #EEF1EF;
+      --muted: #A2ABA5;
+      --line: #2C3330;
+      --code-bg: #0C0E0D;
+      --code-text: #E8ECE9;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Bricolage Grotesque", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* The three flag stripes, used once, as the page's top edge */
+    .stripes {
+      height: 6px;
+      background: linear-gradient(to right, var(--green) 0 33.33%, #fff 33.33% 66.66%, #000 66.66%);
+    }
+
+    a { color: inherit; }
+    a:focus-visible, button:focus-visible {
+      outline: 3px solid var(--red);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
+    .wrap {
+      width: min(1040px, 100% - 32px);
+      margin-inline: auto;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 22px 0;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 18px;
+    }
+    .brand svg { width: 22px; height: 22px; }
+    nav { display: flex; gap: 22px; }
+    nav a {
+      text-decoration: none;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    nav a:hover { color: var(--text); }
+
+    /* Hero */
+    .hero {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 48px;
+      align-items: center;
+      padding: 56px 0 72px;
+    }
+    h1 {
+      font-size: clamp(40px, 6vw, 68px);
+      line-height: 1.02;
+      letter-spacing: -0.02em;
+      font-weight: 700;
+      margin: 0 0 20px;
+      font-variation-settings: "opsz" 96;
+    }
+    .lede {
+      font-size: 20px;
+      color: var(--muted);
+      max-width: 34ch;
+      margin: 0 0 28px;
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 16px;
+      text-decoration: none;
+      border: 1.5px solid transparent;
+      transition: background-color .15s ease, border-color .15s ease;
+    }
+    .btn-primary { background: var(--red); color: #fff; }
+    .btn-primary:hover { background: #C4001F; }
+    .btn-secondary { border-color: var(--line); color: var(--text); background: var(--surface); }
+    .btn-secondary:hover { border-color: var(--text); }
+    .btn svg { width: 18px; height: 18px; }
+
+    .plate {
+      background: var(--plate);
+      border-radius: 24px;
+      padding: 28px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 12px;
+      aspect-ratio: 1 / 1;
+    }
+    .plate img { width: 100%; height: 100%; object-fit: contain; border-radius: 12px; display: block; }
+    .plate img:first-child { grid-row: 1 / 3; }
+
+    /* Sections */
+    section { padding: 56px 0; border-top: 1px solid var(--line); }
+    h2 {
+      font-size: clamp(28px, 3.4vw, 36px);
+      line-height: 1.1;
+      letter-spacing: -0.015em;
+      font-weight: 600;
+      margin: 0 0 8px;
+    }
+    .sub { color: var(--muted); margin: 0 0 32px; max-width: 60ch; }
+
+    /* Install steps — a real sequence, so numbered */
+    .steps { display: grid; gap: 24px; counter-reset: step; }
+    .step {
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+    .step::before {
+      counter-increment: step;
+      content: counter(step);
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--green);
+      color: #fff;
+      font-weight: 600;
+      display: grid;
+      place-items: center;
+      margin-top: 2px;
+    }
+    .step h3 { margin: 6px 0 10px; font-size: 19px; font-weight: 600; }
+
+    pre {
+      position: relative;
+      margin: 0;
+      background: var(--code-bg);
+      color: var(--code-text);
+      border-radius: var(--radius);
+      padding: 18px 56px 18px 20px;
+      overflow-x: auto;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 14.5px;
+      line-height: 1.6;
+    }
+    pre .c { color: #8C9691; }
+    pre .s { color: #9FE0B4; }
+    .copy {
+      position: absolute;
+      top: 10px; right: 10px;
+      background: rgba(255,255,255,.08);
+      color: var(--code-text);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font: 500 13px "Bricolage Grotesque", system-ui, sans-serif;
+      cursor: pointer;
+    }
+    .copy:hover { background: rgba(255,255,255,.16); }
+
+    /* Components */
+    .component {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 32px;
+      align-items: center;
+      padding: 32px 0;
+    }
+    .component + .component { border-top: 1px solid var(--line); }
+    .component .demo {
+      background: var(--plate);
+      border-radius: 18px;
+      overflow: hidden;
+      aspect-ratio: 5 / 3;
+      display: grid;
+      place-items: center;
+    }
+    .component .demo img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .component h3 {
+      margin: 0 0 8px;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 20px;
+      font-weight: 500;
+    }
+    .component p { margin: 0 0 14px; color: var(--muted); }
+    .component pre { padding-right: 20px; font-size: 13.5px; }
+    .fact {
+      display: inline-block;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 3px 10px;
+      margin-bottom: 14px;
+    }
+
+    /* Sizing */
+    .sizes {
+      background: var(--plate);
+      border-radius: 24px;
+      padding: 36px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+    .sizes figure { margin: 0; text-align: center; color: #fff; font-size: 14px; }
+    .sizes img { display: block; margin: 0 auto 10px; border-radius: 8px; }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 32px 0 48px;
+      color: var(--muted);
+      font-size: 15px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    footer a { color: var(--muted); }
+    footer a:hover { color: var(--text); }
+
+    @media (max-width: 860px) {
+      .hero { grid-template-columns: 1fr; gap: 36px; padding: 32px 0 48px; }
+      .component { grid-template-columns: 1fr; gap: 20px; }
+      .component .demo { max-width: 420px; }
+      nav a:not(:last-child) { display: none; }
+    }
+    @media (max-width: 480px) {
+      body { font-size: 16px; }
+      .plate { padding: 16px; gap: 8px; border-radius: 18px; }
+      .step { grid-template-columns: 1fr; }
+      .step::before { width: 30px; height: 30px; font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stripes" aria-hidden="true"></div>
+
+  <div class="wrap">
+    <header>
+      <a class="brand" href="#">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#E4002B" d="M12 1.5l3.1 6.9 7.4.8-5.5 5.1 1.5 7.4L12 18l-6.5 3.7 1.5-7.4L1.5 9.2l7.4-.8z"/></svg>
+        SyriaFlagProgressBar
+      </a>
+      <nav>
+        <a href="#install">Install</a>
+        <a href="#components">Components</a>
+        <a href="https://github.com/muhammedelsami/SyriaFlagProgressBar">GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="hero">
+        <div>
+          <h1>Loading indicators in the colours of the Syrian flag.</h1>
+          <p class="lede">Three animated Android views, drawn on the canvas in pure Kotlin. Drop one into a layout at any size and it stays crisp.</p>
+          <div class="actions">
+            <a class="btn btn-primary" href="#install">Add to your app</a>
+            <a class="btn btn-secondary" href="https://github.com/muhammedelsami/SyriaFlagProgressBar">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .5A11.5 11.5 0 0 0 8.4 22.9c.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6A11.5 11.5 0 0 0 12 .5Z"/></svg>
+              View on GitHub
+            </a>
+          </div>
+        </div>
+        <div class="plate" aria-label="The three progress bars animating">
+          <img src="assets/circle.gif" alt="CircleFlagProgressBar: three spinning rings with red stars">
+          <img src="assets/star_line.gif" alt="StarLineProgressBar: three bars, stars sliding toward the centre">
+          <img src="assets/flag_line.gif" alt="FlagLineProgressBar: three bars sliding in opposite directions">
+        </div>
+      </div>
+
+      <section id="install">
+        <h2>Install</h2>
+        <p class="sub">Published on JitPack. Two edits to your Gradle files and you're done.</p>
+        <div class="steps">
+          <div class="step">
+            <div>
+              <h3>Add the JitPack repository in <code>settings.gradle.kts</code></h3>
+<pre><button class="copy" type="button" data-copy="maven(&quot;https://jitpack.io&quot;)">Copy</button>dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven(<span class="s">"https://jitpack.io"</span>)
+    }
+}</pre>
+            </div>
+          </div>
+          <div class="step">
+            <div>
+              <h3>Add the dependency in your module's <code>build.gradle.kts</code></h3>
+<pre><button class="copy" type="button" data-copy="implementation(&quot;com.github.muhammedelsami:SyriaFlagProgressBar:v1.0.4&quot;)">Copy</button>dependencies {
+    implementation(<span class="s">"com.github.muhammedelsami:SyriaFlagProgressBar:v1.0.4"</span>)
+}</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="components">
+        <h2>Components</h2>
+        <p class="sub">Each one is a plain <code>View</code>. Use it in XML, create it in Kotlin, or wrap it in <code>AndroidView</code> from Compose. Animation starts when the view is attached and stops when it's detached.</p>
+
+        <div class="component">
+          <div class="demo"><img src="assets/circle.gif" alt="CircleFlagProgressBar animation"></div>
+          <div>
+            <h3>CircleFlagProgressBar</h3>
+            <span class="fact">Best in a square view</span>
+            <p>Three concentric rings spin at different speeds and directions, with three red stars riding the white ring.</p>
+<pre>&lt;com.muhammed.syriaflagprogressbar.CircleFlagProgressBar
+    android:layout_width=<span class="s">"64dp"</span>
+    android:layout_height=<span class="s">"64dp"</span> /&gt;</pre>
+          </div>
+        </div>
+
+        <div class="component">
+          <div class="demo"><img src="assets/star_line.gif" alt="StarLineProgressBar animation"></div>
+          <div>
+            <h3>StarLineProgressBar</h3>
+            <span class="fact">Best at about 2 : 1</span>
+            <p>Three horizontal bars. The outer stars glide toward the centre star and back again.</p>
+<pre>&lt;com.muhammed.syriaflagprogressbar.StarLineProgressBar
+    android:layout_width=<span class="s">"160dp"</span>
+    android:layout_height=<span class="s">"80dp"</span> /&gt;</pre>
+          </div>
+        </div>
+
+        <div class="component">
+          <div class="demo"><img src="assets/flag_line.gif" alt="FlagLineProgressBar animation"></div>
+          <div>
+            <h3>FlagLineProgressBar</h3>
+            <span class="fact">Best at about 3 : 1</span>
+            <p>Three horizontal bars with fixed stars. The top and bottom bars slide in opposite directions.</p>
+<pre>&lt;com.muhammed.syriaflagprogressbar.FlagLineProgressBar
+    android:layout_width=<span class="s">"180dp"</span>
+    android:layout_height=<span class="s">"60dp"</span> /&gt;</pre>
+          </div>
+        </div>
+      </section>
+
+      <section id="sizing">
+        <h2>Any size, same design</h2>
+        <p class="sub">Stroke widths, star sizes, spacing and animation distances are all computed from the view's dimensions, so nothing overlaps or gets clipped when you go small.</p>
+        <div class="sizes">
+          <figure><img src="assets/circle.gif" width="160" height="160" alt=""><figcaption>160 dp</figcaption></figure>
+          <figure><img src="assets/circle.gif" width="96" height="96" alt=""><figcaption>96 dp</figcaption></figure>
+          <figure><img src="assets/circle.gif" width="48" height="48" alt=""><figcaption>48 dp</figcaption></figure>
+          <figure><img src="assets/circle.gif" width="24" height="24" alt=""><figcaption>24 dp</figcaption></figure>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>MIT licensed. Made by <a href="https://github.com/muhammedelsami">Muhammed Elşami</a>.</span>
+      <span>Requires Android 7.0 (API 24) or newer.</span>
+    </footer>
+  </div>
+
+  <script>
+    document.querySelectorAll('.copy').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        navigator.clipboard.writeText(btn.dataset.copy).then(function () {
+          btn.textContent = 'Copied';
+          setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
