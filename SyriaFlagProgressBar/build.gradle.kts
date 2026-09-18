@@ -40,7 +40,7 @@ afterEvaluate {
                 from(components["release"])
                 groupId = "com.github.muhammedelsami"
                 artifactId = "SyriaFlagProgressBar"
-                version = "1.0.0"
+                version = "1.0.4"
             }
         }
     }
